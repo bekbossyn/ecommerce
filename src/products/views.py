@@ -5,14 +5,21 @@ from django.shortcuts import render, get_object_or_404
 from .models import Product
 
 
-class ProductListView(ListView):
-    # queryset = Product.objects.all()
+class ProductFeaturedListView(ListView):
     template_name = "products/list.html"
 
-    # def get_context_data(self, *args, **kwargs):
-    #     context = super(ProductListView, self).get_context_data(*args, **kwargs)
-    #     print(context)
-    #     return context
+    def get_queryset(self, *args, **kwargs):
+        request = self.request
+        return Product.objects.all().featured()
+
+
+class ProductFeaturedDetailView(DetailView):
+    queryset = Product.objects.all().featured()
+    template_name = "products/featured-detail.html"
+
+
+class ProductListView(ListView):
+    template_name = "products/list.html"
 
     def get_queryset(self, *args, **kwargs):
         request = self.request
@@ -28,7 +35,6 @@ def product_list_view(request):
 
 
 class ProductDetailView(DetailView):
-    # queryset = Product.objects.all()
     template_name = "products/detail.html"
 
     def get_context_data(self, *args, **kwargs):
@@ -44,35 +50,11 @@ class ProductDetailView(DetailView):
             raise Http404('Product does not exist')
         return instance
 
-    # def get_queryset(self, *args, **kwargs):
-    #     request = self.request
-    #     pk = self.kwargs.get('pk')
-    #     return Product.objects.filter(pk=pk)
-
 
 def product_detail_view(request, pk=None, *args, **kwargs):
-    # instance = Product.objects.all(pk=pk)
-
-    # instance = get_object_or_404(Product, pk=pk)
-
-    # try:
-    #     instance = Product.objects.get(id=pk)
-    # except Product.DoesNotExist:
-    #     print('No product here')
-    #     raise Http404('Product does not exist')
-    # except:
-    #     print('huh?')
-
     instance = Product.objects.get_by_id(pk)
     if instance is None:
         raise Http404('Product does not exist')
-    # print(instance)
-    #
-    # qs = Product.objects.filter(id=pk)
-    # if qs.exists() and qs.count() == 1:
-    #     instance = qs.first()
-    # else:
-    #     raise Http404('Product does not exist')
 
     context = {
         'object': instance,
